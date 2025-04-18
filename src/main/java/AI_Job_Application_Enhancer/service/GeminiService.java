@@ -1,11 +1,9 @@
 package AI_Job_Application_Enhancer.service;
 
+import AI_Job_Application_Enhancer.Constants.Prompts;
 import AI_Job_Application_Enhancer.dto.LLMResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,41 +16,42 @@ import java.util.Map;
 public class GeminiService {
 
     @Value("${gemini.api.url}")
-    private String geminiApiUrl; // Should already have the key in it as a query param
+    private String geminiApiUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public LLMResponse getLLMResponse(String prompt) {
-        Map<String, Object> request = new HashMap<>();
-        List<Map<String, Object>> contents = new ArrayList<>();
-
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", List.of(part));
-        contents.add(content);
-        request.put("contents", contents);
-
+    public LLMResponse getLLMResponse(String resumeText) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(request, headers);
+        Map<String, Object> userPart = Map.of("text", "Here is my resume:\n\n" + resumeText);
+        Map<String, Object> userContent = Map.of("role", "user", "parts", List.of(userPart));
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(geminiApiUrl, httpEntity, Map.class);
+        Map<String, Object> assistantPart = Map.of("text", Prompts.RESUME_FEEDBACK_PROMPT);
+        Map<String, Object> assistantContent = Map.of("role", "assistant", "parts", List.of(assistantPart));
 
-        // Extract text from the first candidate's content
+        Map<String, Object> requestBody = Map.of("contents", List.of(userContent, assistantContent));
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                geminiApiUrl,
+                HttpMethod.POST,
+                entity,
+                Map.class
+        );
+
         List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
         if (candidates != null && !candidates.isEmpty()) {
             Map<String, Object> firstCandidate = candidates.get(0);
-            Map<String, Object> firstContent = (Map<String, Object>) firstCandidate.get("content");
-            List<Map<String, Object>> parts = (List<Map<String, Object>>) firstContent.get("parts");
+            Map<String, Object> content = (Map<String, Object>) firstCandidate.get("content");
+            List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
             if (parts != null && !parts.isEmpty()) {
                 String reply = (String) parts.get(0).get("text");
                 return new LLMResponse(reply);
             }
         }
 
-        return new LLMResponse("No response received from Gemini.");
+        return new LLMResponse("Sorry, I couldn't generate suggestions at the moment.");
     }
 }

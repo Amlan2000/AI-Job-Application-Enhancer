@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Service
-public class FileProcessingService {
+public class FileParsingService {
 
     public String extractText(MultipartFile file) throws IOException {
         String contentType = file.getContentType();

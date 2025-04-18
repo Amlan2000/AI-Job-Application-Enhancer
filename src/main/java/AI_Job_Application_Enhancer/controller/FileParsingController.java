@@ -1,7 +1,7 @@
 package AI_Job_Application_Enhancer.controller;
 
 
-import AI_Job_Application_Enhancer.service.FileProcessingService;
+import AI_Job_Application_Enhancer.service.FileParsingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +14,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/file")
 @RequiredArgsConstructor
-public class FileController {
+public class FileParsingController {
 
-    private final FileProcessingService fileProcessingService;
+    private final FileParsingService fileProcessingService;
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
+
             String text = fileProcessingService.extractText(file);
             return ResponseEntity.ok(text);
         } catch (Exception e) {
