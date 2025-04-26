@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Job Application Enhancer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="static/libs/pdf.min.js"></script>
+  <script src="static/libs/mammoth.browser.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">AI Job Enhancer</h1>
+
+    <div class="upload-section">
+      <div class="upload-row">
+        <label for="resumeInput" class="upload-btn">Upload Resume</label>
+        <div id="fileName" class="file-name">No file selected</div>
+      </div>
+      <input type="file" id="resumeInput" accept=".pdf,.docx" hidden />
+    </div>
+
+    <button id="analyzeBtn" class="analyze-btn">Analyze Job</button>
+    <div id="loadingSpinner" class="loading">Analyzing...</div>
+
+    <div class="output-section" id="outputSection" style="display:none;">
+      <p id="matchResult" class="match-result"></p>
+      <h3 id="suggestions-heading" class="suggestions-heading"></h3>
+      <p id="suggestions" class="suggestions"></p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
